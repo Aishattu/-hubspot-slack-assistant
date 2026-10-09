@@ -1,0 +1,6 @@
+.env
+.venv/
+pending.json
+audit.jsonl
+bot.log
+__pycache__/
