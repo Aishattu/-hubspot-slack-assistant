@@ -44,7 +44,7 @@ bot.py ──────► agent.py (Claude) ──────► hubspot.py 
 ```
 
 1. **bot.py** connects to Slack over Socket Mode. The bot opens the connection to Slack, so it doesn't need a public web address. It receives the message, shows 👀 while working, and replies in the thread.
-2. **agent.py** sends the question to Claude (Opus 5.5) together with a set of HubSpot tools. Claude decides which tools to call and in what order. For example, it looks up the pipeline stages first, then searches deals with the right stage ID. It then writes the answer in Slack format.
+2. **agent.py** sends the question to Claude together with a set of HubSpot tools. Claude decides which tools to call and in what order. For example, it looks up the pipeline stages first, then searches deals with the right stage ID. It then writes the answer in Slack format.
 3. **hubspot.py** makes the actual HubSpot API calls. It retries automatically if HubSpot rate-limits it.
 4. **Write tools are fenced off.** When Claude calls `update_record`, `create_note` or `create_task`, nothing is sent to HubSpot. The request becomes a proposal card in Slack, and only the Approve button calls HubSpot.
 
@@ -70,37 +70,6 @@ bot.py ──────► agent.py (Claude) ──────► hubspot.py 
 | `slack-app-manifest.json` | Creates the Slack app with the right permissions in one paste |
 | `run.sh` / `install.sh` | Run in the terminal / run as a background service on macOS |
 | `.env.example` | Template for the keys (the real `.env` is never committed) |
-
-## Setup
-
-**You need:** Python 3.9+, a Slack workspace where you can install apps, a HubSpot account (super admin to create the key), and an Anthropic API key with credit.
-
-**1. HubSpot key.** Go to Settings → Integrations → **Service Keys** (or a legacy Private App token if you already have one). Give it read and write access to contacts, companies and deals; read access to owners and to the contact, company and deal schemas; and access to notes and tasks. Add tickets only if you use them.
-
-**2. Slack app.** At [api.slack.com/apps](https://api.slack.com/apps) choose **Create New App → From a manifest**, then paste the *contents* of `slack-app-manifest.json`. Then:
-- Basic Information → App-Level Tokens → generate one with `connections:write` (this is the `xapp-` token)
-- Install App → Install to Workspace (this gives the `xoxb-` token)
-
-**3. Anthropic key.** Create one at [console.anthropic.com](https://console.anthropic.com).
-
-**4. Configure and run**
-```sh
-git clone <this repo> && cd hubspot-slack-assistant
-cp .env.example .env              # paste your 4 keys into .env
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python check_setup.py   # every line should show ✅
-sh run.sh                         # or: sh install.sh to run in the background on macOS
-```
-
-**5. Use it.** DM the bot, or `/invite @HubSpot Assistant` to a channel and @mention it.
-
-## Good to know
-
-- **It must stay running to answer.** Socket Mode keeps a live connection to Slack. If the machine sleeps, the bot goes quiet until it wakes up. For 24/7 use, host it on an always-on server (Railway, Render, a VPS). It runs there unchanged.
-- **Thread memory resets on restart.** Pending approval cards and the audit log are saved to disk and survive.
-- **Cost.** Each question costs a few cents of Claude usage, depending on how many lookups it needs.
-- **HubSpot Private Apps.** HubSpot is ending creation of new legacy Private Apps (from 26 Oct 2026 for existing accounts). Existing tokens keep working. New setups should use Service Keys.
-- **Tickets** need Service Hub. Without it, the bot just says it can't see tickets.
 
 ## Built with
 
