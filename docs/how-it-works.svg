@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 540" width="1000" height="540" role="img" aria-labelledby="t d">
+  <title id="t">How the HubSpot Assistant works</title>
+  <desc id="d">A Slack question goes to the Slack listener, then to Claude, which calls HubSpot tools and posts the answer back in the thread. Changes become a proposal card that a person must approve before HubSpot is updated and the change is logged.</desc>
+  <style>
+    .bg { fill: #F4F6F9; }
+    .node { fill: #FFFFFF; stroke: #D3DAE3; stroke-width: 1.2; }
+    .eyebrow { font: 600 10.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .08em; }
+    .title { font: 700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #15212B; }
+    .sub { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #5B6B7A; }
+    .h1 { font: 700 21px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #15212B; }
+    .label { font: 500 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #5B6B7A; }
+    .brand { font: 800 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #15212B; letter-spacing: .01em; }
+    .slack { fill: #611F69; } .py { fill: #2F6F8F; } .claude { fill: #B85A37; } .hub { fill: #D9532E; } .write { fill: #7A2E7E; }
+    .read-line { stroke: #2F7D8C; stroke-width: 2; fill: none; stroke-dasharray: 6 5; animation: march 0.9s linear infinite; }
+    .write-line { stroke: #7A2E7E; stroke-width: 2; fill: none; stroke-dasharray: 6 5; animation: march 0.9s linear infinite; }
+    .pulse { animation: pulse 2.4s ease-in-out infinite; transform-origin: 661px 389px; }
+    @keyframes march { to { stroke-dashoffset: -22; } }
+    @keyframes pulse { 0%, 55%, 100% { transform: scale(1); } 70% { transform: scale(1.12); } }
+    @media (prefers-reduced-motion: reduce) { .read-line, .write-line, .pulse { animation: none; } .dot { display: none; } }
+  </style>
+  <defs>
+    <marker id="aRead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2F7D8C"/></marker>
+    <marker id="aWrite" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7A2E7E"/></marker>
+    <path id="returnArc" d="M890,142 C890,100 872,90 830,90 L170,90 C128,90 110,100 110,142"/>
+    <path id="writePath" d="M500,238 L500,318"/>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1000" height="540" rx="16"/>
+  <text class="h1" x="30" y="46">How the HubSpot Assistant works</text>
+
+  <!-- answer comes back to Slack -->
+  <use href="#returnArc" class="read-line" marker-end="url(#aRead)"/>
+  <text class="label" x="500" y="80" text-anchor="middle">Answer + HubSpot record links posted back in the Slack thread</text>
+  <circle class="dot" r="5" fill="#2F7D8C"><animateMotion dur="3.6s" repeatCount="indefinite"><mpath href="#returnArc"/></animateMotion></circle>
+
+  <!-- read path connectors -->
+  <line class="read-line" x1="192" y1="190" x2="221" y2="190" marker-end="url(#aRead)"/>
+  <line class="read-line" x1="387" y1="190" x2="416" y2="190" marker-end="url(#aRead)"/>
+  <line class="read-line" x1="582" y1="190" x2="611" y2="190" marker-end="url(#aRead)"/>
+  <line class="read-line" x1="777" y1="190" x2="806" y2="190" marker-end="url(#aRead)"/>
+
+  <!-- row 1 -->
+  <g>
+    <rect class="node" x="30" y="142" width="160" height="96" rx="10"/>
+    <text class="eyebrow slack" x="46" y="166">SLACK</text>
+    <text class="title" x="46" y="190">Someone asks</text>
+    <text class="sub" x="46" y="210">“What stage is the</text>
+    <text class="sub" x="46" y="225">Acme deal in?”</text>
+  </g>
+  <g>
+    <rect class="node" x="225" y="142" width="160" height="96" rx="10"/>
+    <text class="eyebrow py" x="241" y="166">bot.py</text>
+    <text class="title" x="241" y="190">Slack listener</text>
+    <text class="sub" x="241" y="210">Socket Mode, replies</text>
+    <text class="sub" x="241" y="225">in the thread</text>
+  </g>
+  <g>
+    <rect class="node" x="420" y="142" width="160" height="96" rx="10"/>
+    <text class="eyebrow claude" x="436" y="166">agent.py</text>
+    <text class="title" x="436" y="190">Claude Opus 5.5</text>
+    <text class="sub" x="436" y="210">Decides which tools</text>
+    <text class="sub" x="436" y="225">to call, writes reply</text>
+  </g>
+  <g>
+    <rect class="node" x="615" y="142" width="160" height="96" rx="10"/>
+    <text class="eyebrow py" x="631" y="166">hubspot.py</text>
+    <text class="title" x="631" y="190">HubSpot tools</text>
+    <text class="sub" x="631" y="210">Search, read records,</text>
+    <text class="sub" x="631" y="225">stages and owners</text>
+  </g>
+  <g>
+    <rect class="node" x="810" y="142" width="160" height="96" rx="10"/>
+    <text class="eyebrow hub" x="826" y="166">HUBSPOT</text>
+    <text class="title" x="826" y="190">CRM data</text>
+    <text class="sub" x="826" y="210">Contacts, companies,</text>
+    <text class="sub" x="826" y="225">deals, tickets</text>
+  </g>
+
+  <!-- write path -->
+  <use href="#writePath" class="write-line" marker-end="url(#aWrite)"/>
+  <circle class="dot" r="5" fill="#7A2E7E"><animateMotion dur="1.8s" repeatCount="indefinite"><mpath href="#writePath"/></animateMotion></circle>
+  <text class="label" x="512" y="284">Asked to change something?</text>
+  <line class="write-line" x1="582" y1="366" x2="611" y2="366" marker-end="url(#aWrite)"/>
+  <line class="write-line" x1="777" y1="366" x2="806" y2="366" marker-end="url(#aWrite)"/>
+  <line class="write-line" x1="890" y1="416" x2="890" y2="436" marker-end="url(#aWrite)"/>
+
+  <g>
+    <rect class="node" x="420" y="320" width="160" height="96" rx="10"/>
+    <text class="eyebrow write" x="436" y="344">PROPOSAL</text>
+    <text class="title" x="436" y="368">Change drafted</text>
+    <text class="sub" x="436" y="388">Nothing is sent to</text>
+    <text class="sub" x="436" y="403">HubSpot yet</text>
+  </g>
+  <g>
+    <rect class="node" x="615" y="320" width="160" height="96" rx="10"/>
+    <text class="eyebrow slack" x="631" y="344">SLACK</text>
+    <text class="title" x="631" y="368">Person reviews</text>
+    <g class="pulse">
+      <rect x="631" y="378" width="60" height="22" rx="5" fill="#1F7A4D"/>
+      <text x="661" y="393" text-anchor="middle" style="font: 600 11px -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif; fill: #FFFFFF">Approve</text>
+    </g>
+    <rect x="698" y="378" width="56" height="22" rx="5" fill="#FFFFFF" stroke="#C4CDD8"/>
+    <text x="726" y="393" text-anchor="middle" style="font: 600 11px -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif; fill: #15212B">Cancel</text>
+  </g>
+  <g>
+    <rect class="node" x="810" y="320" width="160" height="96" rx="10"/>
+    <text class="eyebrow hub" x="826" y="344">HUBSPOT</text>
+    <text class="title" x="826" y="368">Change saved</text>
+    <text class="sub" x="826" y="388">Only after someone</text>
+    <text class="sub" x="826" y="403">clicks Approve</text>
+  </g>
+  <rect x="830" y="440" width="120" height="28" rx="6" fill="#ECEFF4" stroke="#D3DAE3"/>
+  <text x="890" y="458" text-anchor="middle" style="font: 500 11.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #15212B">audit.jsonl</text>
+
+  <!-- legend -->
+  <line class="read-line" x1="30" y1="336" x2="66" y2="336"/>
+  <text class="label" x="76" y="340">Questions: answered right away</text>
+  <line class="write-line" x1="30" y1="364" x2="66" y2="364"/>
+  <text class="label" x="76" y="368">Changes: wait for a person</text>
+  <text class="label" x="30" y="396">Every change is logged: who, what, when</text>
+
+  <!-- footer -->
+  <line x1="30" y1="490" x2="970" y2="490" stroke="#D3DAE3" stroke-width="1"/>
+  <text class="label" x="30" y="518">Python · Slack Bolt · Claude Opus 5.5 · HubSpot CRM API</text>
+  <text class="brand" x="970" y="519" text-anchor="end">AishaStreamlines</text>
+</svg>

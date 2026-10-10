@@ -74,3 +74,7 @@ bot.py ──────► agent.py (Claude) ──────► hubspot.py 
 ## Built with
 
 [Slack Bolt for Python](https://github.com/slackapi/bolt-python) · [Anthropic Python SDK](https://github.com/anthropics/anthropic-sdk-python) (Claude Opus 5.5, tool use) · [HubSpot CRM API v3/v4](https://developers.hubspot.com/docs/api/crm/understanding-the-crm)
+
+## How it all connects
+
+![How the HubSpot Assistant works](docs/how-it-works.svg)
