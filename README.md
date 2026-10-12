@@ -18,6 +18,7 @@ It looks things up in HubSpot and answers in the Slack thread with links to the 
 - Understand "my deals" by matching the person's Slack email to their HubSpot owner
 
 **Write (always with approval)**
+- Create a new contact or deal (checks for duplicates first)
 - Update any field on a record
 - Add a note to a record
 - Create a task on a record (with due date, owner and priority)
@@ -46,7 +47,7 @@ bot.py ──────► agent.py (Claude) ──────► hubspot.py 
 1. **bot.py** connects to Slack over Socket Mode. The bot opens the connection to Slack, so it doesn't need a public web address. It receives the message, shows 👀 while working, and replies in the thread.
 2. **agent.py** sends the question to Claude together with a set of HubSpot tools. Claude decides which tools to call and in what order. For example, it looks up the pipeline stages first, then searches deals with the right stage ID. It then writes the answer in Slack format.
 3. **hubspot.py** makes the actual HubSpot API calls. It retries automatically if HubSpot rate-limits it.
-4. **Write tools are fenced off.** When Claude calls `update_record`, `create_note` or `create_task`, nothing is sent to HubSpot. The request becomes a proposal card in Slack, and only the Approve button calls HubSpot.
+4. **Write tools are fenced off.** When Claude calls `create_record`, `update_record`, `create_note` or `create_task`, nothing is sent to HubSpot. The request becomes a proposal card in Slack, and only the Approve button calls HubSpot.
 
 ## Safety
 

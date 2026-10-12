@@ -89,6 +89,12 @@ def audit(event, proposal, user_id, result=None):
 
 def describe(p):
     """Slack text for a proposal card."""
+    if p["tool"] == "create_record":
+        lines = [f"*Proposed new {p['object_type'][:-1]}: {p['record_name']}*"]
+        lines += [f"• `{k}`: *{v}*" for k, v in p["properties"].items()]
+        for a in p.get("associate", []):
+            lines.append(f"• Linked to {a['object_type'][:-1]}: {a.get('record_name') or a['record_id']}")
+        return "\n".join(lines)
     url = hubspot.record_url(p["object_type"], p["record_id"])
     name = f"<{url}|{p['record_name']}>" if url else f"*{p['record_name']}*"
     if p["tool"] == "update_record":
@@ -223,7 +229,8 @@ def approve(ack, body):
         note_for_thread(p["channel"], p["thread_ts"], f"proposal {pid} was approved but HubSpot rejected it: {e}")
         return
     audit("approved", p, user_id, result)
-    _finish_card(body, f"{describe(p)}\n\n:white_check_mark: *Approved by <@{user_id}> and saved to HubSpot.*")
+    link = f" <{result['url']}|Open in HubSpot>" if p["tool"] == "create_record" and result.get("url") else ""
+    _finish_card(body, f"{describe(p)}\n\n:white_check_mark: *Approved by <@{user_id}> and saved to HubSpot.*{link}")
     note_for_thread(p["channel"], p["thread_ts"], f"proposal {pid} was approved and saved to HubSpot.")
 
 

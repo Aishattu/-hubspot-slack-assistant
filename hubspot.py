@@ -168,6 +168,18 @@ def update_record(object_type, record_id, properties):
                                         json={"properties": properties}))
 
 
+CREATABLE = ("contacts", "deals")
+
+
+def create_record(object_type, properties, associate=None):
+    """Create a contact or deal. associate: [{"object_type": "companies", "record_id": "123"}, ...]"""
+    _check_type(object_type, CREATABLE)
+    obj = _request("POST", f"/crm/v3/objects/{object_type}", json={"properties": properties})
+    for a in associate or []:
+        _associate(object_type, obj["id"], a["object_type"], a["record_id"])
+    return _shape(object_type, obj)
+
+
 def _now_ms():
     return str(int(time.time() * 1000))
 

@@ -30,9 +30,11 @@ How to work:
 - For "newest/latest/last created" use sort_by createdate DESCENDING. Use hs_object_source_label to say where a record came from (import, integration, form, manual).
 
 Changing data:
-- update_record, create_note and create_task do NOT change HubSpot directly. They create a proposal that is shown to the user with Approve / Cancel buttons. Only after someone clicks Approve is HubSpot updated.
+- create_record, update_record, create_note and create_task do NOT change HubSpot directly. They create a proposal that is shown to the user with Approve / Cancel buttons. Only after someone clicks Approve is HubSpot updated.
 - So after proposing, say what you proposed and that it's waiting for approval. Never say it's done.
 - Only propose changes the user actually asked for. Look up the record first so you have the right ID and the current value.
+- create_record can create contacts and deals only (not companies or tickets). Before proposing one, search for duplicates (contacts: by email, then name; deals: by deal name). If a match exists, show it and ask whether to update it instead.
+- New deals need dealname, pipeline and dealstage: call list_pipelines and use the stage the user names, or the first stage of the default pipeline. Link the deal to the contact/company the user mentions via `associate`.
 
 Answer style (this is Slack):
 - Short and scannable. Lead with the answer. Use bullets for lists, *bold* for names. Slack uses *single asterisks* for bold, not double.
@@ -85,6 +87,19 @@ TOOLS = [
     {"name": "list_owners",
      "description": "HubSpot users who can own records, with their owner IDs. Optionally filter by email.",
      "input_schema": {"type": "object", "properties": {"email": {"type": "string"}}}},
+    {"name": "create_record",
+     "description": "PROPOSE creating a new contact or deal. Shown to the user for approval; does not change HubSpot by itself.",
+     "input_schema": {"type": "object", "properties": {
+         "object_type": {"type": "string", "enum": ["contacts", "deals"]},
+         "record_name": {"type": "string", "description": "Human name of the new record, for the approval message"},
+         "properties": {"type": "object", "additionalProperties": {"type": "string"},
+                        "description": "internal_name → value, e.g. firstname, lastname, email, jobtitle, company / dealname, amount, pipeline, dealstage, closedate"},
+         "associate": {"type": "array", "description": "Existing records to link the new record to",
+                       "items": {"type": "object", "properties": {
+                           "object_type": OBJ, "record_id": {"type": "string"},
+                           "record_name": {"type": "string"}},
+                           "required": ["object_type", "record_id"]}}},
+         "required": ["object_type", "record_name", "properties"]}},
     {"name": "update_record",
      "description": "PROPOSE changing properties on a record. Shown to the user for approval; does not change HubSpot by itself.",
      "input_schema": {"type": "object", "properties": {
@@ -121,7 +136,7 @@ READ_TOOLS = {
     "list_pipelines": hubspot.list_pipelines,
     "list_owners": hubspot.list_owners,
 }
-WRITE_TOOLS = {"update_record", "create_note", "create_task"}
+WRITE_TOOLS = {"create_record", "update_record", "create_note", "create_task"}
 
 
 def _due_ms(date_str):
@@ -132,8 +147,13 @@ def _due_ms(date_str):
 def make_proposal(name, args):
     """Turn a write-tool call into a pending change that a human must approve."""
     p = {"id": uuid.uuid4().hex[:10], "tool": name, "object_type": args["object_type"],
-         "record_id": str(args["record_id"]), "record_name": args.get("record_name", args["record_id"])}
-    if name == "update_record":
+         "record_id": str(args.get("record_id", "")), "record_name": args.get("record_name") or args.get("record_id", "")}
+    if name == "create_record":
+        if args["object_type"] not in hubspot.CREATABLE:
+            raise ValueError("Only contacts and deals can be created.")
+        p.update(properties={k: str(v) for k, v in args["properties"].items()},
+                 associate=args.get("associate") or [])
+    elif name == "update_record":
         p.update(properties={k: str(v) for k, v in args["properties"].items()},
                  current_values=args.get("current_values") or {}, summary=args.get("summary", ""))
     elif name == "create_note":
@@ -148,6 +168,8 @@ def make_proposal(name, args):
 
 def apply_proposal(p):
     """Called by bot.py when someone clicks Approve."""
+    if p["tool"] == "create_record":
+        return hubspot.create_record(p["object_type"], p["properties"], p.get("associate"))
     if p["tool"] == "update_record":
         return hubspot.update_record(p["object_type"], p["record_id"], p["properties"])
     if p["tool"] == "create_note":
